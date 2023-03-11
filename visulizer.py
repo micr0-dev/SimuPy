@@ -30,7 +30,22 @@ def run(body_log: list, simStep):
     if abs(minY) > difY:
         difY = abs(minY)
 
-    screensize = physics.Vector2(500, 1000)
+    screensize = physics.Vector2(400, 800)
+
+    paddedSpace = screensize*0.85
+
+    offset = screensize/2
+
+    offset.y = screensize.y-(screensize.y-paddedSpace.y)/2
+
+    scaleX = (paddedSpace.x/2) / difX
+    scaleY = paddedSpace.y / difY
+
+    print(scaleX, scaleY, "   ", difX, difY)
+
+    scale = scaleX
+    if scaleY < scaleX:
+        scale = scaleY
 
     display_surface = pygame.display.set_mode(screensize.tuple())
 
@@ -47,19 +62,9 @@ def run(body_log: list, simStep):
     rect = image.get_rect()
 
     num = 0
-
-    paddedSpace = screensize*0.8
-
-    offset = paddedSpace/2
-
-    offset.y = paddedSpace.y
-
-    scaleX = paddedSpace.x / difX
-    scaleY = paddedSpace.y / difY
-
-    scale = scaleX
-    if scaleY < scaleX:
-        scale = scaleY
+    isReversed = False
+    timeScale = 1
+    isPaused = False
 
     while True:
         # Process events
@@ -68,24 +73,50 @@ def run(body_log: list, simStep):
                 pygame.quit()
                 sys.exit()
 
-        if num < len(body_log):
+            if event.type == pygame.KEYDOWN:
 
-            # Draw the rocket
-            display_surface.fill((200, 250, 255))
-            pygame.draw.rect(display_surface, (140, 255, 100),
-                             (0, offset.y, screensize.x, offset.y))
+                if event.key == pygame.K_RIGHT:
+                    timeScale *= 2
 
-            # rotating the orignal image
-            new_image = pygame.transform.rotate(
-                image_orig, -body_log[num].angle)
-            rect = new_image.get_rect()
-            # set the rotated rectangle to the old center
-            rect.center = (-body_log[num].position*scale+offset).tuple()
-            # drawing the rotated rectangle to the screen
-            display_surface.blit(new_image, rect)
+                if event.key == pygame.K_LEFT:
+                    timeScale /= 2
 
-            # Update the display
-            pygame.display.update()
+                if event.key == pygame.K_SPACE:
+                    isPaused = not isPaused
 
-            num += 1
-            sleep(simStep)
+                if event.key == pygame.K_r:
+                    isReversed = not isReversed
+
+        # Draw the environment
+        display_surface.fill((200, 250, 255))
+        pygame.draw.rect(display_surface, (140, 255, 100),
+                         (0, offset.y, screensize.x, offset.y))
+
+        # Draw bread crumbs
+        for body in body_log[0:num][0::int(1/simStep/4)]:
+            pygame.draw.rect(display_surface, (255, 0, 0), (
+                             (-body.position*scale+offset).tuple(),
+                             physics.Vector2.one().tuple()))
+
+        # Draw the rocket
+        new_image = pygame.transform.rotate(
+            image_orig, -body_log[num].angle)
+        rect = new_image.get_rect()
+        # set the rotated rectangle to the old center
+        rect.center = (-body_log[num].position*scale+offset).tuple()
+        # drawing the rotated rectangle to the screen
+        display_surface.blit(new_image, rect)
+
+        # Update the display
+        pygame.display.update()
+
+        if not isPaused:
+            if isReversed:
+                num -= 1
+            else:
+                num += 1
+            sleep(simStep / abs(timeScale))
+        if num > len(body_log)-1:
+            num = len(body_log)-1
+        elif num < 0:
+            num = 0

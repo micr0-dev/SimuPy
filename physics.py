@@ -8,6 +8,24 @@ class Vector2:
         self.x = x
         self.y = y
 
+    def one():
+        return Vector2(1, 1)
+
+    def zero():
+        return Vector2()
+
+    def up():
+        return Vector2(0, 1)
+
+    def down():
+        return Vector2(0, -1)
+
+    def left():
+        return Vector2(1, 0)
+
+    def right():
+        return Vector2(-1, 0)
+
     def __str__(self):
         return "(" + str(self.x) + ", " + str(self.y) + ")"
 
@@ -78,6 +96,7 @@ class Body:
         self.position = Vector2(x, y)
         self.velocity = Vector2(0, 0)
         self.acceleration = Vector2(0, 0)
+        self.thrust = Vector2(0, 0)
         self.size = Vector2(sizex, sizey)
         self.mass = mass
         self.angle = angle
@@ -89,6 +108,7 @@ class Body:
 
     def apply_vert_force(self, force):
         force_vec = Vector2(0, force)
+        self.thrust = Vector2(0, force)
         # Rotate the force vector by the body's current angle
         force_vec.rotate_ip(self.angle)
         # Add the rotated force to the body's acceleration
@@ -104,6 +124,7 @@ class Body:
         self.velocity += self.acceleration * dt
         self.position += self.velocity * dt
         self.acceleration = Vector2(0, 0)
+        self.thrust = Vector2(0, 0)
 
         self.angular_velocity += self.angular_acceleration * dt
         self.angle += self.angular_velocity * dt

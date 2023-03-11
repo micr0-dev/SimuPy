@@ -57,7 +57,7 @@ while running:
     b.apply_gravity()
 
     if thrusttime > time:
-        b.apply_torque(-1)
+        b.apply_torque(-10)
 
     b_log.append(copy.deepcopy(b))
 
