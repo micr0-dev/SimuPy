@@ -2,9 +2,9 @@ from physics import *
 import matplotlib.pyplot as plt
 import numpy as np
 import copy
-import visulizer
+import visualizer
 
-b = Body(0, 0, 2, 10, 0.5)
+b = Body(0, 0, 2, 10, 0.1)
 
 tcE16 = ThrustCurve(((0,	    0),
                     (0.15,	1.371),
@@ -37,7 +37,7 @@ tcE16 = ThrustCurve(((0,	    0),
                     (2.063,	4.97),
                     (2.09,	0)))
 
-# tcE16.plot()
+tcE16.plot()
 
 simStep = 0.01
 
@@ -57,7 +57,7 @@ while running:
     b.apply_gravity()
 
     if thrusttime > time:
-        b.apply_torque(-10)
+        b.apply_torque(1)
 
     b_log.append(copy.deepcopy(b))
 
@@ -89,18 +89,18 @@ positions = np.array(positions)
 altitudes = np.array(altitudes)
 rotations = np.array(rotations)
 
-# plt.plot(np.arange(len(altitudes))*simStep, altitudes)
-# plt.xlabel('Time')
-# plt.ylabel('Altitude')
-# plt.title('Altitude of Body Over Time')
-# plt.show()
+plt.plot(np.arange(len(altitudes))*simStep, altitudes)
+plt.xlabel('Time')
+plt.ylabel('Altitude')
+plt.title('Altitude of Body Over Time')
+plt.show()
 
-# # Plot the position data
-# plt.plot(positions[:, 0], positions[:, 1])
-# plt.xlabel('X Position')
-# plt.ylabel('Y Position')
-# plt.title('Position of Body Over Time')
-# plt.show()
+# Plot the position data
+plt.plot(positions[:, 0], positions[:, 1])
+plt.xlabel('X Position')
+plt.ylabel('Y Position')
+plt.title('Position of Body Over Time')
+plt.show()
 
 # plt.plot(np.arange(len(rotations))*simStep, rotations)
 # plt.xlabel('Time')
@@ -137,4 +137,4 @@ for body in b_log:
 with open("sim.csv", "w") as file1:
     file1.write("\n".join(csv))
 
-visulizer.run(b_log, simStep)
+visualizer.run(b_log, simStep)
