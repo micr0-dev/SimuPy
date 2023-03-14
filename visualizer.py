@@ -1,4 +1,6 @@
+import math
 import pygame
+from pygame import gfxdraw
 import sys
 import physics
 from time import sleep
@@ -12,6 +14,8 @@ def run(body_log: list, simStep):
     maxY = 0
     minY = 0
 
+    maxThrust = 0
+
     for body in body_log:
         if body.position.x > maxX:
             maxX = body.position.x
@@ -21,6 +25,8 @@ def run(body_log: list, simStep):
             minX = body.position.x
         if body.position.y < minY:
             minY = body.position.y
+        if body.thrust.y > maxThrust:
+            maxThrust = body.thrust.y
 
     difX = abs(maxX)
     if abs(minX) > difX:
@@ -32,7 +38,7 @@ def run(body_log: list, simStep):
 
     font = pygame.font.Font('freesansbold.ttf', 20)
 
-    screensize = physics.Vector2(400, 800)
+    screensize = physics.Vector2(500, 1000)
 
     paddedSpace = screensize*0.85
 
@@ -51,8 +57,16 @@ def run(body_log: list, simStep):
 
     pygame.display.set_caption('Rocket Visualizer')
 
+    rocketSize = body_log[0].size*scale
+
+    if (rocketSize.x < 4):
+        rocketSize.x = 4
+    if (rocketSize.y < 4):
+        rocketSize.y = 4
+
+    print(rocketSize)
     # define a surface (RECTANGLE)
-    image_orig = pygame.Surface(body_log[0].size.tuple())
+    image_orig = pygame.Surface((rocketSize).tuple())
     # for making transparent background while rotating an image
     image_orig.set_colorkey((255, 255, 255))
     # fill the rectangle / surface with green color
@@ -62,6 +76,9 @@ def run(body_log: list, simStep):
     image.set_colorkey((255, 255, 255))
     # define rect for placing the rectangle at the desired position
     rect = image.get_rect()
+
+    # Motor Burn image
+    burnimg = pygame.image.load("./burn.png")
 
     num = 0
     isReversed = False
@@ -135,6 +152,23 @@ def run(body_log: list, simStep):
         rect.center = (-body_log[num].position*scale+offset).tuple()
         # drawing the rotated rectangle to the screen
         display_surface.blit(new_image, rect)
+
+        # Draw the Motor Fire
+
+        thrust = body_log[num].thrust.y/maxThrust
+
+        burnimgdif = pygame.transform.scale(
+            burnimg, (physics.Vector2(9, 16)*rocketSize.x*thrust*0.5).tuple())
+
+        rect = burnimgdif.get_rect()
+
+        rect.center = ((-body_log[num].position*scale +
+                       offset) + physics.Vector2((math.sin(math.radians(-body_log[num].angle)))*(rocketSize.y/2), rect.height/2 + rocketSize.y/2)).tuple()
+
+        # burnimgdif = pygame.transform.rotate(
+        #     burnimgdif, -body_log[num].angle)
+
+        display_surface.blit(burnimgdif, rect)
 
         if timeScale != 1:
             text = font.render(str(timeScale)+"x", True, (255, 255, 255))

@@ -131,6 +131,11 @@ class Body:
         self.angular_acceleration = 0
 
 
+class Rocket(Body):
+    def __init__(self, height, diameter, mass):
+        super(Rocket, self).__init__(0, height/2, diameter, height, mass)
+
+
 class ThrustCurve:
     def __init__(self, data):
         self.times = []
